@@ -98,7 +98,7 @@ class ClientTable(tables.Table):
     class Meta:
         model = Client
         template_name = "django_tables2/bootstrap4.html"
-        fields = ('nom', 'prenom',  'adresse','chiffre_affaire')
+        fields = ('nom', 'prenom', 'adresse', 'chiffre_affaire')
 
 
 class ClientsView(ListView):
@@ -108,8 +108,26 @@ class ClientsView(ListView):
     def get_context_data(self, **kwargs):
         context = super(ClientsView, self).get_context_data(**kwargs)
 
-        queryset = Client.objects.values('nom', 'prenom', 'adresse').annotate(chiffre_affaire=Sum(ExpressionWrapper(F('facture__lignes__qte'), output_field=FloatField())*F('facture__lignes__produit__prix')))
+        queryset = Client.objects.values('nom', 'prenom', 'adresse').annotate(chiffre_affaire=Sum(
+            ExpressionWrapper(F('facture__lignes__qte'), output_field=FloatField()) * F(
+                'facture__lignes__produit__prix')))
         table = ClientTable(queryset)
-        RequestConfig(self.request, paginate={"per_page": 2}).configure(table)
+        RequestConfig(self.request, paginate={"per_page": 10}).configure(table)
         context['table'] = table
         return context
+
+
+class ClientCreateView(CreateView):
+    model = Client
+    template_name = 'bill/create_client.html'
+    fields = ['nom', 'prenom', 'sexe', 'adresse', 'tel']
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.helper = FormHelper()
+
+
+        form.helper.add_input(Submit('submit', 'Créer', css_class='btn-primary'))
+        form.helper.add_input(Button('cancel', 'Annuler', css_class='btn-secondary', onclick="window.history.back()"))
+        self.success_url = reverse('client_table')
+        return form

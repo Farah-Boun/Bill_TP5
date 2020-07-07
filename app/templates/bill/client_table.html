@@ -8,6 +8,10 @@
     </head>
     <body>
         <h2>Clients:</h2>
+        <br />
+        <a href="{% url 'client_create' %}" class="btn btn-primary">Ajouter Client</a>
+        <br />
+        <br />
         <!-- on affiche les lignes des clients  -->
             {% render_table table %}
     </body>

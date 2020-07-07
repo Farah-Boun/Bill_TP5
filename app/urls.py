@@ -8,5 +8,6 @@ urlpatterns = [
     re_path(r'^lignefacture_update/(?P<pk>\d+)/(?P<facture_pk>\d+)/$', views.LigneFactureUpdateView.as_view(), name='lignefacture_update'),
     re_path(r'^facture_update/(?P<pk>\d+)/$', views.FactureUpdate.as_view(), name='facture_detail'),
     re_path(r'^client_table/$', views.ClientsView.as_view(), name='client_table'),
+    re_path(r'^client_create/$', views.ClientCreateView.as_view(), name='client_create'),
 
 ]
