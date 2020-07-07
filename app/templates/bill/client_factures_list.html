@@ -7,8 +7,10 @@
         {% bootstrap_javascript jquery='full' %} {# Embed Bootstrap JS+jQuery #}
     </head>
     <body>
-        <h2>Client: {{ facture.client }}</h2>
-
+        <h2>Client: {{ client.id }}</h2>
+        <br>
+        <a href="{% url 'facture_create' client_pk=client.id %}" class="btn btn-primary">Ajouter Facture</a>
+        <br>
         <!-- on affiche les factures du client -->
             {% render_table table %}
     </body>

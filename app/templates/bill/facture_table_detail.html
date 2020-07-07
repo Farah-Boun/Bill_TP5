@@ -9,6 +9,11 @@
     <body>
         <h2>Facture N° {{ facture.id }}</h2>
         Client: {{ facture.client }}
+        <!-- on affiche un bouton pour ajouter une ligne facture -->
+        <br>
+        <a href="{% url 'facture_table_create' facture_pk=facture.id %}" class="btn btn-primary">Ajouter Ligne</a>
+        <br>
+        <br>
         <!-- on affiche les lignes de la facture -->
             {% render_table table %}
     </body>

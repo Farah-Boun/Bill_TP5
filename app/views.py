@@ -1,3 +1,4 @@
+from bootstrap_datepicker_plus import DatePickerInput
 from django.db.models import Sum, ExpressionWrapper, F, FloatField
 from django.shortcuts import render, get_object_or_404
 from django.views.generic import ListView
@@ -64,7 +65,7 @@ class LigneFactureCreateView(CreateView):
         form.fields['facture'] = forms.ModelChoiceField(
             queryset=Facture.objects.filter(id=self.kwargs.get('facture_pk')), initial=0)
         form.helper.add_input(Submit('submit', 'Créer', css_class='btn-primary'))
-        form.helper.add_input(Button('cancel', 'Annuler', css_class='btn-secondary', onclick="window.history.back()"))
+        form.helperz.add_input(Button('cancel', 'Annuler', css_class='btn-secondary', onclick="window.history.back()"))
         self.success_url = reverse('facture_table_detail', kwargs={'pk': self.kwargs.get('facture_pk')})
         return form
 
@@ -95,15 +96,18 @@ class LigneFactureDeleteView(DeleteView):
 
 
 class ClientTable(tables.Table):
-    action = '<a href="{% url "client_update" pk=record.id %}" class="btn btn-warning">Modifier</a>\
-              <a href="{% url "client_delete" pk=record.id %}" class="btn btn-danger">Supprimer</a>\
-             <a href="{% url "client_factures_list" pk=record.id  %}" class="btn btn-danger">Liste Factures</a>'
+    action = '<a href="{% url "client_update" pk=record.id  %}" class="btn btn-warning">Modifier</a>\
+              <a href="{% url "client_delete" pk=record.id  %}" class="btn btn-danger">Supprimer</a>\
+             <a href="{% url "client_factures_list" pk=record.id %}" class="btn btn-danger">Liste Factures</a>'
     edit = tables.TemplateColumn(action)
 
     class Meta:
         model = Client
         template_name = "django_tables2/bootstrap4.html"
         fields = ('id','nom', 'prenom', 'adresse', 'chiffre_affaire')
+
+
+
 
 
 class ClientsView(ListView):
@@ -125,7 +129,7 @@ class ClientsView(ListView):
 class ClientCreateView(CreateView):
     model = Client
     template_name = 'bill/create_client.html'
-    fields = ['nom', 'prenom', 'sexe', 'adresse', 'tel']
+    fields = ['id','nom', 'prenom', 'sexe', 'adresse', 'tel']
 
     def get_form(self, form_class=None):
         form = super().get_form(form_class)
@@ -135,25 +139,6 @@ class ClientCreateView(CreateView):
         form.helper.add_input(Button('cancel', 'Annuler', css_class='btn-secondary', onclick="window.history.back()"))
         self.success_url = reverse('client_table')
         return form
-
-
-class FactureTable(tables.Table):
-    class Meta:
-        model = Facture
-        template_name = "django_tables2/bootstrap4.html"
-        fields = ('id', 'date')
-
-
-class ClientFacturesListView(DetailView):
-    template_name = 'bill/client_factures_list.html'
-    model = Facture
-
-    def get_context_data(self, **kwargs):
-        context = super(ClientFacturesListView, self).get_context_data(**kwargs)
-
-        table = FactureTable(Facture.objects.filter(client_id=self.kwargs.get('pk')))
-        context['table'] = table
-        return context
 
 
 class ClientUpdateView(UpdateView):
@@ -175,3 +160,42 @@ class ClientDeleteView(DeleteView):
     template_name = 'bill/client_delete.html'
     def get_success_url(self):
         self.success_url = reverse('client_table')
+
+
+class ClientFacturesListView(DetailView):
+    template_name = 'bill/client_factures_list.html'
+    model = Client
+
+    def get_context_data(self, **kwargs):
+        context = super(ClientFacturesListView, self).get_context_data(**kwargs)
+        queryset = Facture.objects.filter(client_id=self.kwargs.get('pk')).annotate(total=Sum(
+            ExpressionWrapper(F('lignes__qte'), output_field=FloatField()) * F('lignes__produit__prix')))
+        table = FactureTable(queryset)
+        context['table'] = table
+        return context
+
+
+class FactureTable(tables.Table):
+    class Meta:
+        model = Facture
+        template_name = "django_tables2/bootstrap4.html"
+        fields = ('id', 'date','total')
+
+
+class FactureCreateView(CreateView):
+    model = Facture
+    template_name = 'bill/create_facture.html'
+    fields = ['client', 'date']
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.helper = FormHelper()
+        form.fields['client'] = forms.ModelChoiceField(
+            queryset=Client.objects.filter(id=self.kwargs.get('client_pk')), initial=0)
+        form.fields['date'] = forms.DateField(
+        widget=DatePickerInput(format='%m/%d/%Y')
+    )
+        form.helper.add_input(Submit('submit', 'Créer', css_class='btn-primary'))
+        form.helper.add_input(Button('cancel', 'Annuler', css_class='btn-secondary', onclick="window.history.back()"))
+        self.success_url = reverse('client_factures_list', kwargs={'pk': self.kwargs.get('client_pk')})
+        return form
