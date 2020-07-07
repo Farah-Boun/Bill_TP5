@@ -1,7 +1,6 @@
 from django.db import models
 from django import utils
 import datetime
-
 # Create your models here.
 from django.views.generic import DetailView
 from django_tables2 import tables
@@ -24,6 +23,7 @@ class Client(models.Model):
 
 class Fournisseur(models.Model):
     designation = models.CharField(max_length=50)
+    adresse = models.CharField(max_length=50, default='alger')
 
 class Produit(models.Model):
     designation = models.CharField(max_length=50)

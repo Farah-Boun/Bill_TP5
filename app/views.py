@@ -1,4 +1,6 @@
+from django.db.models import Sum, ExpressionWrapper, F, FloatField
 from django.shortcuts import render, get_object_or_404
+from django.views.generic import ListView
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
 from django.views.generic.detail import DetailView
 import django_tables2 as tables
@@ -8,7 +10,7 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, HTML, Button
 from django.urls import reverse
 
-from app.models import Facture, LigneFacture
+from app.models import Facture, LigneFacture, Fournisseur
 
 
 # Create your views here.
@@ -91,3 +93,37 @@ class LigneFactureDeleteView(DeleteView):
     def get_success_url(self):
         self.success_url = reverse('facture_table_detail', kwargs={'pk': self.kwargs.get('facture_pk')})
 
+
+
+class FournisseurTable(tables.Table):
+    class Meta:
+        model = Fournisseur
+        template_name = "django_tables2/bootstrap4.html"
+        fields = ('designation', 'adresse')
+
+class FournisseursView(ListView):
+    model = Fournisseur
+    template_name = 'bill/fournisseur_table.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(FournisseursView, self).get_context_data(**kwargs)
+
+        table = FournisseurTable(Fournisseur.objects.all())
+        RequestConfig(self.request, paginate={"per_page": 10}).configure(table)
+        context['table'] = table
+        return 
+
+class FournisseurCreateView(CreateView):
+    model = Fournisseur
+    template_name = 'bill/create_fournisseur.html'
+    fields = ['designation', 'adresse']
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.helper = FormHelper()
+
+
+        form.helper.add_input(Submit('submit', 'Créer', css_class='btn-primary'))
+        form.helper.add_input(Button('cancel', 'Annuler', css_class='btn-secondary', onclick="window.history.back()"))
+        self.success_url = reverse('fournisseur_table')
+        return form
