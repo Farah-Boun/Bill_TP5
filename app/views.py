@@ -95,10 +95,15 @@ class LigneFactureDeleteView(DeleteView):
 
 
 class ClientTable(tables.Table):
+    action = '<a href="{% url "client_update" pk=record.id %}" class="btn btn-warning">Modifier</a>\
+              <a href="{% url "client_delete" pk=record.id %}" class="btn btn-danger">Supprimer</a>\
+             <a href="{% url "client_factures_list" pk=record.id  %}" class="btn btn-danger">Liste Factures</a>'
+    edit = tables.TemplateColumn(action)
+
     class Meta:
         model = Client
         template_name = "django_tables2/bootstrap4.html"
-        fields = ('nom', 'prenom', 'adresse', 'chiffre_affaire')
+        fields = ('id','nom', 'prenom', 'adresse', 'chiffre_affaire')
 
 
 class ClientsView(ListView):
@@ -108,7 +113,7 @@ class ClientsView(ListView):
     def get_context_data(self, **kwargs):
         context = super(ClientsView, self).get_context_data(**kwargs)
 
-        queryset = Client.objects.values('nom', 'prenom', 'adresse').annotate(chiffre_affaire=Sum(
+        queryset = Client.objects.values('id','nom', 'prenom', 'adresse').annotate(chiffre_affaire=Sum(
             ExpressionWrapper(F('facture__lignes__qte'), output_field=FloatField()) * F(
                 'facture__lignes__produit__prix')))
         table = ClientTable(queryset)
@@ -126,8 +131,47 @@ class ClientCreateView(CreateView):
         form = super().get_form(form_class)
         form.helper = FormHelper()
 
-
         form.helper.add_input(Submit('submit', 'Créer', css_class='btn-primary'))
         form.helper.add_input(Button('cancel', 'Annuler', css_class='btn-secondary', onclick="window.history.back()"))
         self.success_url = reverse('client_table')
         return form
+
+
+class FactureTable(tables.Table):
+    class Meta:
+        model = Facture
+        template_name = "django_tables2/bootstrap4.html"
+        fields = ('id', 'date')
+
+
+class ClientFacturesListView(DetailView):
+    template_name = 'bill/client_factures_list.html'
+    model = Facture
+
+    def get_context_data(self, **kwargs):
+        context = super(ClientFacturesListView, self).get_context_data(**kwargs)
+
+        table = FactureTable(Facture.objects.filter(client_id=self.kwargs.get('pk')))
+        context['table'] = table
+        return context
+
+
+class ClientUpdateView(UpdateView):
+    model = Client
+    fields = ['nom', 'prenom', 'sexe', 'adresse', 'tel']
+    template_name = 'bill/client_update.html'
+
+    def get_form(self, form_class=None):
+        form = super().get_form(form_class)
+        form.helper = FormHelper()
+        form.helper.add_input(Submit('submit', 'Modifier', css_class='btn-primary'))
+        form.helper.add_input(Button('cancel', 'Annuler', css_class='btn-secondary', onclick="window.history.back()"))
+        self.success_url = reverse('client_table')
+        return form
+
+
+class ClientDeleteView(DeleteView):
+    model = Client
+    template_name = 'bill/client_delete.html'
+    def get_success_url(self):
+        self.success_url = reverse('client_table')
