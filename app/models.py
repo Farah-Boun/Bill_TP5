@@ -18,10 +18,14 @@ class Client(models.Model):
     def __str__(self):
         return self.nom + ' ' + self.prenom
 
+
+class Fournisseur(models.Model):
+    designation = models.CharField(max_length=50)
+
 class Produit(models.Model):
     designation = models.CharField(max_length=50)
     prix = models.FloatField(default=0)
-
+    fournisseur =  models.ForeignKey(Fournisseur, on_delete=models.CASCADE, related_name='produits', default=1)
     def __str__(self):
         return self.designation
     
