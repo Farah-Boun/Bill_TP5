@@ -3,6 +3,9 @@ from django import utils
 import datetime
 
 # Create your models here.
+from django.views.generic import DetailView
+from django_tables2 import tables
+
 
 class Client(models.Model):
     SEXE = (
@@ -53,4 +56,4 @@ class LigneFacture(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['produit', 'facture'], name="produit-facture")
         ]
-    
+
