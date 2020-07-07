@@ -29,6 +29,7 @@ class Client(models.Model):
 
 class Fournisseur(models.Model):
     designation = models.CharField(max_length=50)
+    adresse = models.CharField(max_length=50)
 
 class Produit(models.Model):
     designation = models.CharField(max_length=50)
