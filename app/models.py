@@ -3,6 +3,7 @@ from django import utils
 import datetime
 
 # Create your models here.
+from django.db.models import *
 from django.views.generic import DetailView
 from django_tables2 import tables
 
@@ -20,6 +21,10 @@ class Client(models.Model):
     
     def __str__(self):
         return self.nom + ' ' + self.prenom
+
+    @property
+    def calcul(self):
+        return "Testo"
 
 
 class Fournisseur(models.Model):

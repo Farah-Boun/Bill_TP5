@@ -1,4 +1,6 @@
+from django.db.models import Sum, ExpressionWrapper, F, FloatField
 from django.shortcuts import render, get_object_or_404
+from django.views.generic import ListView
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
 from django.views.generic.detail import DetailView
 import django_tables2 as tables
@@ -8,14 +10,14 @@ from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, HTML, Button
 from django.urls import reverse
 
-from app.models import Facture, LigneFacture
+from app.models import Facture, LigneFacture, Client
 
 
 # Create your views here.
 
 def facture_detail_view(request, pk):
     facture = get_object_or_404(Facture, id=pk)
-    context={}
+    context = {}
     context['facture'] = facture
     return render(request, 'bill/facture_detail.html', context)
 
@@ -91,3 +93,23 @@ class LigneFactureDeleteView(DeleteView):
     def get_success_url(self):
         self.success_url = reverse('facture_table_detail', kwargs={'pk': self.kwargs.get('facture_pk')})
 
+
+class ClientTable(tables.Table):
+    class Meta:
+        model = Client
+        template_name = "django_tables2/bootstrap4.html"
+        fields = ('nom', 'prenom',  'adresse','chiffre_affaire')
+
+
+class ClientsView(ListView):
+    model = Client
+    template_name = 'bill/client_table.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ClientsView, self).get_context_data(**kwargs)
+
+        queryset = Client.objects.values('nom', 'prenom', 'adresse').annotate(chiffre_affaire=Sum(ExpressionWrapper(F('facture__lignes__qte'), output_field=FloatField())*F('facture__lignes__produit__prix')))
+        table = ClientTable(queryset)
+        RequestConfig(self.request, paginate={"per_page": 2}).configure(table)
+        context['table'] = table
+        return context
