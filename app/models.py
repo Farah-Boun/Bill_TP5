@@ -55,7 +55,7 @@ class Facture(models.Model):
 
 
 class LigneFacture(models.Model):
-    produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
+    produit = models.ForeignKey(Produit, on_delete=models.CASCADE, related_name='factures')
     qte = models.IntegerField(default=1)
     facture = models.ForeignKey(Facture, on_delete=models.CASCADE, related_name='lignes')
     class Meta:

@@ -10,6 +10,9 @@ from django import forms
 from crispy_forms.helper import FormHelper
 from crispy_forms.layout import Submit, HTML, Button
 from django.urls import reverse
+from django_tables2 import MultiTableMixin
+from django.views.generic.base import TemplateView
+from django.db.models import Count
 
 from app.models import Facture, LigneFacture, Client, Fournisseur
 
@@ -261,3 +264,36 @@ class FournisseurDeleteView(DeleteView):
 
     def get_success_url(self):
         self.success_url = reverse('fournisseur_table')
+
+
+class CAClientTable(tables.Table):
+    class Meta:
+        model = Client
+        template_name = "django_tables2/bootstrap4.html"
+        fields = ('chiffre_affaire','nom', 'prenom' )
+
+class CAFournisseurTable(tables.Table):
+    class Meta:
+        model = Fournisseur
+        template_name = "django_tables2/bootstrap4.html"
+        fields = ('chiffre_affaire','designation', 'adresse' )
+
+
+class DashboardTables(MultiTableMixin, TemplateView):
+    template_name = 'bill/dashboard.html'
+    table_pagination = {
+        "per_page": 10
+    }
+
+    def get_tables(self):
+        qs1=  Fournisseur.objects.values('designation', 'adresse').annotate(chiffre_affaire=Sum(
+            ExpressionWrapper(F('produits__factures__qte'), output_field=FloatField()) * F(
+                'produits__prix')))
+        qs2= Client.objects.values('nom', 'prenom').annotate(chiffre_affaire=Sum(
+            ExpressionWrapper(F('facture__lignes__qte'), output_field=FloatField()) * F(
+                'facture__lignes__produit__prix'))).order_by('-chiffre_affaire')
+        return [
+            CAFournisseurTable(qs1),
+            CAClientTable(qs2)
+        ]
+
