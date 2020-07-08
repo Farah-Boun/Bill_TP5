@@ -191,10 +191,5 @@ class FournisseurDeleteView(DeleteView):
     fields = ['designation', 'adresse']
     template_name = 'bill/fournisseur_delete.html'
 
-    def get_form(self, form_class=None):
-        form= super().get_form(form_class)
-        form.helper = FormHelper()
-        form.helper.add_input(Submit('submit', 'Confirmer', css_class='btn-primary'))
-        form.helper.add_input(Button('cancel', 'Annuler', css_class='btn-secondary', onclick="window.history.back()"))
+    def get_success_url(self):
         self.success_url = reverse('fournisseur_table')
-        return form
