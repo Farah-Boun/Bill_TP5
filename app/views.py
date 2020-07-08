@@ -272,6 +272,7 @@ class CAClientTable(tables.Table):
         template_name = "django_tables2/bootstrap4.html"
         fields = ('chiffre_affaire','nom', 'prenom' )
 
+
 class CAFournisseurTable(tables.Table):
     class Meta:
         model = Fournisseur
