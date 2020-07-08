@@ -68,7 +68,7 @@ class LigneFactureCreateView(CreateView):
         form.fields['facture'] = forms.ModelChoiceField(
             queryset=Facture.objects.filter(id=self.kwargs.get('facture_pk')), initial=0)
         form.helper.add_input(Submit('submit', 'Créer', css_class='btn-primary'))
-        form.helperz.add_input(Button('cancel', 'Annuler', css_class='btn-secondary', onclick="window.history.back()"))
+        form.helper.add_input(Button('cancel', 'Annuler', css_class='btn-secondary', onclick="window.history.back()"))
         self.success_url = reverse('facture_table_detail', kwargs={'pk': self.kwargs.get('facture_pk')})
         return form
 
