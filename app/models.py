@@ -31,12 +31,21 @@ class Fournisseur(models.Model):
     designation = models.CharField(max_length=50)
     adresse = models.CharField(max_length=50)
 
-class Produit(models.Model):
-    designation = models.CharField(max_length=50)
-    prix = models.FloatField(default=0)
-    fournisseur =  models.ForeignKey(Fournisseur, on_delete=models.CASCADE, related_name='produits', default=1)
     def __str__(self):
         return self.designation
+
+
+class Produit(models.Model):
+    photo = models.ImageField(upload_to='media', default='banniere.png')
+    designation = models.CharField(max_length=50)
+    prix = models.FloatField(default=0)
+    fournisseur = models.ForeignKey(Fournisseur, on_delete=models.CASCADE, related_name='produits', default=1)
+
+    def __str__(self):
+        return self.designation
+
+    def serialize(self):
+        return self.__dict__
     
     
 class Facture(models.Model):
@@ -63,3 +72,23 @@ class LigneFacture(models.Model):
             models.UniqueConstraint(fields=['produit', 'facture'], name="produit-facture")
         ]
 
+
+class Commande(models.Model):
+    client = models.ForeignKey(Client, on_delete=models.CASCADE)
+    produits = models.ManyToManyField(Produit)
+
+
+class PanierItem(models.ManyToManyField):
+    produit = models.ForeignKey(Produit, on_delete=models.CASCADE)
+    qte = models.IntegerField(default=1)
+
+    def serialize(self):
+        return self.__dict__
+
+class PanierLine(object):
+    def __init__(self, id, qte):
+        self.id = id
+        self.qte = qte
+
+    def serialize(self):
+        return self.__dict__

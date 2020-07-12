@@ -20,5 +20,8 @@ urlpatterns = [
     re_path(r'^dashboard/$', views.DashboardTables.as_view(),  name='dashboard'),
     re_path(r'^signup/$', views.signup, name='signup'),
 
+    re_path(r'^produits/$', views.ProduitsView.as_view(), name='produits_table'),
+    re_path(r'^YOUR_VIEW_DEF/(?P<pk>\d+)$', views.YOUR_VIEW_DEF, name='YOUR_VIEW_DEF'),
+
 
 ]

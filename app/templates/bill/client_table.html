@@ -1,12 +1,7 @@
-<!DOCTYPE HTML>
-<html>
-    <head>
-        <meta charset="utf-8">
-        {% load bootstrap4 django_tables2 %}
-        {% bootstrap_css %} {# Embed Bootstrap CSS #}
-        {% bootstrap_javascript jquery='full' %} {# Embed Bootstrap JS+jQuery #}
-    </head>
-    <body>
+{% extends './base.html' %}
+{% load bootstrap4 django_tables2 crispy_forms_tags %}
+
+{% block content %}
         <h2>Clients:</h2>
         <br />
         <a href="{% url 'client_create' %}" class="btn btn-primary">Ajouter Client</a>
@@ -14,5 +9,5 @@
         <br />
         <!-- on affiche les lignes des clients  -->
             {% render_table table %}
-    </body>
-</html>
+
+{% endblock %}

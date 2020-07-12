@@ -17,7 +17,7 @@ from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from app.models import Facture, LigneFacture, Client, Fournisseur
+from app.models import Facture, LigneFacture, Client, Fournisseur, Produit, PanierItem, PanierLine
 
 
 # Create your views here.
@@ -302,7 +302,6 @@ class DashboardTables(MultiTableMixin, TemplateView):
         ]
 
 
-
 def signup(request):
     if request.method == 'POST':
         form =  UserCreationForm(request.POST)
@@ -318,4 +317,57 @@ def signup(request):
     return render(request, 'bill/signup.html', {'form': form})
 
 
+class ProduitTable(tables.Table):
+    action = '<a href="{% url "YOUR_VIEW_DEF" pk=record.id %}" class="btn btn-warning">Ajouter au panier</a>'
+    edit = tables.TemplateColumn(action)
+
+    class Meta:
+        model = Produit
+        template_name = "django_tables2/bootstrap4.html"
+        fields = ('photo','designation', 'prix','fournisseur')
+
+
+class ProduitsView(ListView):
+    model = Produit
+    template_name = 'bill/produits_table.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(ProduitsView, self).get_context_data(**kwargs)
+
+        queryset = Produit.objects.all()
+        table = ProduitTable(queryset)
+        context['table'] = table
+        return context
+
+def YOUR_VIEW_DEF(request, pk):
+    panier = request.session.get("panier")
+    if panier is None:
+        panier = []
+    panier.append(PanierLine(pk,1).serialize())
+    request.session["panier"] = panier
+    #pan = request.session.get("panier")
+    return redirect('produits_table')
+    """
+    if pan is not None:
+        print(pan[0])
+    """
+
+class PanierTable(tables.Table):
+    class Meta:
+        model = Produit
+        template_name = "django_tables2/bootstrap4.html"
+        fields = ('photo','designation','qte','prix')
+
+
+class PanierView(ListView):
+    model = Produit
+    template_name = 'bill/panier_table.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(PanierView, self).get_context_data(**kwargs)
+
+        queryset = Produit.objects.all()
+        table = ProduitTable(queryset)
+        context['table'] = table
+        return context
 
