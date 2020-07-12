@@ -16,12 +16,15 @@ from django.db.models import Count
 from django.contrib.auth import login, authenticate
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth.decorators import login_required
 
 from app.models import Facture, LigneFacture, Client, Fournisseur, Produit, PanierItem, PanierLine
 
 
 # Create your views here.
 
+@login_required
 def facture_detail_view(request, pk):
     facture = get_object_or_404(Facture, id=pk)
     context = {}
@@ -29,7 +32,10 @@ def facture_detail_view(request, pk):
     return render(request, 'bill/facture_detail.html', context)
 
 
-class FactureUpdate(UpdateView):
+class FactureUpdate(LoginRequiredMixin, UpdateView):
+    login_url = '../../../accounts/login/'
+    redirect_field_name = 'redirect_to'
+    
     model = Facture
     fields = ['client', 'date']
     template_name = 'bill/update.html'
