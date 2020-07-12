@@ -1,6 +1,6 @@
 from bootstrap_datepicker_plus import DatePickerInput
 from django.db.models import Sum, ExpressionWrapper, F, FloatField
-from django.shortcuts import render, get_object_or_404
+from django.shortcuts import render, get_object_or_404, redirect
 from django.views.generic import ListView
 from django.views.generic.edit import UpdateView, CreateView, DeleteView
 from django.views.generic.detail import DetailView
@@ -13,6 +13,9 @@ from django.urls import reverse
 from django_tables2 import MultiTableMixin
 from django.views.generic.base import TemplateView
 from django.db.models import Count
+from django.contrib.auth import login, authenticate
+from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
 
 from app.models import Facture, LigneFacture, Client, Fournisseur
 
@@ -297,4 +300,22 @@ class DashboardTables(MultiTableMixin, TemplateView):
             CAFournisseurTable(qs1),
             CAClientTable(qs2)
         ]
+
+
+
+def signup(request):
+    if request.method == 'POST':
+        form =  UserCreationForm(request.POST)
+        if form.is_valid():
+            form.save()
+            username = form.cleaned_data.get('username')
+            raw_password = form.cleaned_data.get('password1')
+            user = authenticate(username=username, password=raw_password)
+            login(request, user)
+            return redirect('dashboard')
+    else:
+        form = UserCreationForm()
+    return render(request, 'bill/signup.html', {'form': form})
+
+
 

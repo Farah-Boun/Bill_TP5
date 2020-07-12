@@ -18,5 +18,7 @@ urlpatterns = [
     re_path(r'^fournisseur_delete/(?P<pk>\d+)/$', views.FournisseurDeleteView.as_view(), name='fournisseur_delete'),
     re_path(r'^fournisseur_update/(?P<pk>\d+)/$', views.FournisseurUpdateView.as_view(),  name='fournisseur_update'),
     re_path(r'^dashboard/$', views.DashboardTables.as_view(),  name='dashboard'),
+    re_path(r'^signup/$', views.signup, name='signup'),
+
 
 ]
