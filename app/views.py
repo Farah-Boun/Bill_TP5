@@ -188,6 +188,8 @@ class ClientFacturesListView(DetailView):
 
 
 class FactureTable(tables.Table):
+    action = '<a href="{% url "facture_table_detail" pk=record.id %}" class="btn btn-secondary">Afficher contenu</a>'
+    edit = tables.TemplateColumn(action)
     class Meta:
         model = Facture
         template_name = "django_tables2/bootstrap4.html"
@@ -211,6 +213,7 @@ class FactureCreateView(CreateView):
         form.helper.add_input(Button('cancel', 'Annuler', css_class='btn-secondary', onclick="window.history.back()"))
         self.success_url = reverse('client_factures_list', kwargs={'pk': self.kwargs.get('client_pk')})
         return form
+
 
 class FournisseurTable(tables.Table):
     action = '<a href="{% url "fournisseur_update" pk=record.id %}" class="btn btn-warning">Modifier</a>\
